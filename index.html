@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MWX Staking Contract Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .controls-panel {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            height: fit-content;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .contract-state {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3498db;
+        }
+
+        .contract-state h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .state-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .state-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .state-value {
+            font-family: 'Courier New', monospace;
+            color: #2c3e50;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .action-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e1e8ed;
+            transition: all 0.3s ease;
+        }
+
+        .action-section:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-section h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+        }
+
+        .stake-icon { background: #27ae60; }
+        .unstake-icon { background: #e74c3c; }
+        .claim-icon { background: #f39c12; }
+        .emergency-icon { background: #8e44ad; }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .results-panel {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: white;
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .tab-content {
+            padding: 25px;
+            min-height: 600px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #e1e8ed;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .uint256 {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #666;
+            background: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .timestamp {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .status-active { color: #27ae60; font-weight: 600; }
+        .status-inactive { color: #e74c3c; font-weight: 600; }
+
+        .lock-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .lock-option {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e1e8ed;
+            text-align: center;
+        }
+
+        .lock-option.active {
+            border-color: #27ae60;
+            background: #e8f8f0;
+        }
+
+        .lock-duration {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .lock-multiplier {
+            color: #27ae60;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            color: #d63447;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            border-left: 4px solid #d63447;
+        }
+
+        .success-message {
+            background: #e8f8f0;
+            color: #27ae60;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            border-left: 4px solid #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 MWX Staking Calculator</h1>
+            <p>Simulate staking scenarios with real Solidity precision</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls-panel">
+                <!-- Contract State -->
+                <div class="contract-state">
+                    <h3>📊 Contract State</h3>
+                    <div class="state-item">
+                        <span class="state-label">Current Time:</span>
+                        <span class="state-value timestamp" id="currentTime">1640995200</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="state-label">Annual Reward Pool:</span>
+                        <span class="state-value uint256" id="annualRewardPool">1000000000000000000000000</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="state-label">Emission/Second:</span>
+                        <span class="state-value uint256" id="emissionPerSecond">${emissionPerSecond}</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="state-label">Total Effective Stake:</span>
+                        <span class="state-value uint256" id="totalEffectiveStake">0</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="state-label">Reward Per Token:</span>
+                        <span class="state-value uint256" id="rewardPerToken">0</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="state-label">Total Rewards Claimed:</span>
+                        <span class="state-value uint256" id="totalRewardsClaimed">0</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="state-label">Last Update Time:</span>
+                        <span class="state-value uint256" id="lastUpdateTime">0</span>
+                    </div>
+                </div>
+
+                <!-- Lock Options -->
+                <div class="lock-options">
+                    <div class="lock-option active" data-lock-id="0">
+                        <div class="lock-duration">Flexible</div>
+                        <div class="lock-multiplier">1.0x</div>
+                    </div>
+                    <div class="lock-option active" data-lock-id="1">
+                        <div class="lock-duration">90 Days</div>
+                        <div class="lock-multiplier">1.25x</div>
+                    </div>
+                    <div class="lock-option active" data-lock-id="2">
+                        <div class="lock-duration">180 Days</div>
+                        <div class="lock-multiplier">1.5x</div>
+                    </div>
+                    <div class="lock-option active" data-lock-id="3">
+                        <div class="lock-duration">365 Days</div>
+                        <div class="lock-multiplier">2.0x</div>
+                    </div>
+                </div>
+
+                <!-- Stake Action -->
+                <div class="action-section">
+                    <h4><span class="action-icon stake-icon">+</span>Stake Tokens</h4>
+                    <div class="form-group">
+                        <label>Amount (with 18 decimals):</label>
+                        <input type="text" id="stakeAmount" placeholder="1,000 or 1.5" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Lock Option:</label>
+                        <select id="lockOption">
+                            <option value="0">Flexible (1.0x)</option>
+                            <option value="1">90 Days (1.25x)</option>
+                            <option value="2">180 Days (1.5x)</option>
+                            <option value="3">365 Days (2.0x)</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" onclick="executeStake()">Stake</button>
+                    <div id="stakeMessage"></div>
+                </div>
+
+                <!-- Unstake Action -->
+                <div class="action-section">
+                    <h4><span class="action-icon unstake-icon">-</span>Unstake Tokens</h4>
+                    <div class="form-group">
+                        <label>Stake ID:</label>
+                        <input type="number" id="unstakeId" placeholder="1" min="1">
+                    </div>
+                    <button class="btn btn-warning" onclick="executeUnstake()">Unstake</button>
+                    <div id="unstakeMessage"></div>
+                </div>
+
+                <!-- Claim Action -->
+                <div class="action-section">
+                    <h4><span class="action-icon claim-icon">💰</span>Claim Rewards</h4>
+                    <div class="form-group">
+                        <label>Stake ID (leave empty for claim all):</label>
+                        <input type="number" id="claimId" placeholder="1 or leave empty" min="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="executeClaim()">Claim</button>
+                    <div id="claimMessage"></div>
+                </div>
+
+                <!-- Emergency Unstake -->
+                <div class="action-section">
+                    <h4><span class="action-icon emergency-icon">⚠️</span>Emergency Unstake</h4>
+                    <div class="form-group">
+                        <label>Stake ID:</label>
+                        <input type="number" id="emergencyId" placeholder="1" min="1">
+                    </div>
+                    <button class="btn btn-danger" onclick="executeEmergencyUnstake()">Emergency Unstake</button>
+                    <div id="emergencyMessage"></div>
+                </div>
+
+                <!-- Time Control -->
+                <div class="action-section">
+                    <h4><span class="action-icon" style="background: #34495e;">⏰</span>Time Control</h4>
+                    <div class="form-group">
+                        <label>Skip Time (seconds):</label>
+                        <input type="number" id="skipTime" placeholder="86400" value="86400">
+                    </div>
+                    <button class="btn btn-primary" onclick="skipTime()">Skip Time</button>
+                    <div style="margin-top: 10px;">
+                        <label style="font-weight:600;">
+                            <input type="checkbox" id="autoUpdateToggle" checked style="margin-right:6px; vertical-align:middle;">Auto Update Time & Rewards
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('stakes')">Stakes</button>
+                    <button class="tab" onclick="showTab('transactions')">Transactions</button>
+                    <button class="tab" onclick="showTab('analytics')">Analytics</button>
+                </div>
+
+                <div id="stakes-content" class="tab-content">
+                    <h3>Active Stakes</h3>
+                    <div class="table-container">
+                        <table id="stakesTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Effective Amount</th>
+                                    <th>Multiplier</th>
+                                    <th>Start Time</th>
+                                    <th>Unlock Time</th>
+                                    <th>Time Elapsed</th>
+                                    <th>Pending Rewards</th>
+                                    <th>userRewardPerTokenPaid</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stakesTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="transactions-content" class="tab-content" style="display: none;">
+                    <h3>Transaction History</h3>
+                    <div class="table-container">
+                        <table id="transactionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Action</th>
+                                    <th>Stake ID</th>
+                                    <th>Amount</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="analytics-content" class="tab-content" style="display: none;">
+                    <h3>Analytics Dashboard</h3>
+                    <div class="analytics-grid">
+                        <div class="state-item">
+                            <span class="state-label">Total Staked:</span>
+                            <span class="state-value uint256" id="totalStaked">0</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-label">Total Rewards Claimed:</span>
+                            <span class="state-value uint256" id="totalRewardsClaimed">0</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-label">Total Pending Rewards:</span>
+                            <span class="state-value uint256" id="totalPendingRewards">0</span>
+                        </div>
+                        <div class="state-item">
+                            <span class="state-label">Current APR:</span>
+                            <span class="state-value" id="currentAPR">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants matching Solidity contract
+        const PRECISION_FACTOR = BigInt('1000000000000000000'); // 1e18
+        const SECONDS_PER_YEAR = BigInt('31536000');
+
+        const totalRewardPoolAllYear = BigInt('47000000000000000000000000'); // 47M tokens with 18 decimals
+        const forYear = BigInt('5'); // 1 year
+        const annualRewardPool = (totalRewardPoolAllYear * PRECISION_FACTOR) / forYear;
+        const emissionPerSecond = annualRewardPool / SECONDS_PER_YEAR;
+        const endTimeOfRewardPeriod = BigInt('1640995200') + SECONDS_PER_YEAR * forYear;
+
+        // Contract state
+        let contractState = {
+            currentTime: BigInt('1640995200'), // Jan 1, 2022
+            annualRewardPool: annualRewardPool,
+            emissionPerSecond: emissionPerSecond,
+            totalEffectiveStake: BigInt('0'),
+            rewardPerTokenStored: BigInt('0'),
+            lastUpdateTime: BigInt('1640995200'),
+            totalRewardsClaimed: BigInt('0'),
+            nextStakeId: 1,
+            endTimeOfRewardPeriod: endTimeOfRewardPeriod
+        };
+
+        // User state
+        let userStakes = new Map(); // stakeId => StakeInfo
+        let transactionHistory = [];
+
+        // Lock options
+        const lockOptions = {
+            0: { duration: BigInt('0'), multiplier: PRECISION_FACTOR, name: 'Flexible' },
+            1: { duration: BigInt('7776000'), multiplier: BigInt('1250000000000000000'), name: '90 Days' }, // 90 * 24 * 60 * 60
+            2: { duration: BigInt('15552000'), multiplier: BigInt('1500000000000000000'), name: '180 Days' }, // 180 * 24 * 60 * 60
+            3: { duration: BigInt('31536000'), multiplier: BigInt('2000000000000000000'), name: '365 Days' } // 365 * 24 * 60 * 60
+        };
+
+        // Stake structure
+        class StakeInfo {
+            constructor(stakeId, amount, lockId) {
+                this.stakeId = stakeId;
+                this.owner = 'user';
+                this.stakeType = lockId > 0 ? 'LOCKED' : 'FLEXIBLE';
+                this.amount = amount;
+                this.multiplier = lockOptions[lockId].multiplier;
+                this.effectiveAmount = (amount * this.multiplier) / PRECISION_FACTOR;
+                this.startTime = contractState.currentTime;
+                this.unlockTime = lockId > 0 ? contractState.currentTime + lockOptions[lockId].duration : BigInt('0');
+                this.lastUpdateTime = contractState.currentTime;
+                this.userRewardPerTokenPaid = contractState.rewardPerTokenStored;
+                this.pendingRewards = BigInt('0');
+                this.lockId = lockId;
+                this.active = true;
+            }
+        }
+
+        // Update reward calculations
+        function updateReward() {
+            const newRewardPerToken = calculateRewardPerToken();
+
+            let currentTime = BigInt(contractState.currentTime);
+            if (currentTime > contractState.endTimeOfRewardPeriod) {
+                currentTime = contractState.endTimeOfRewardPeriod;
+            }
+
+            contractState.rewardPerTokenStored = newRewardPerToken;
+            const lastUpdateTime = BigInt(currentTime);
+            contractState.lastUpdateTime = lastUpdateTime;
+        }
+
+        function calculateRewardPerToken() {
+            console.log("contractState.totalEffectiveStake", contractState.totalEffectiveStake);
+            if (contractState.totalEffectiveStake === BigInt('0')) {
+                return contractState.rewardPerTokenStored;
+            }
+
+            let currentTime = BigInt(contractState.currentTime);
+            if (currentTime > contractState.endTimeOfRewardPeriod) {
+                currentTime = contractState.endTimeOfRewardPeriod;
+            }
+
+            let lastUpdateTime = BigInt(contractState.lastUpdateTime);
+            if (lastUpdateTime > contractState.endTimeOfRewardPeriod) {
+                lastUpdateTime = contractState.endTimeOfRewardPeriod;
+            }
+
+            const timeDiff = currentTime - lastUpdateTime;
+            const rewardAccrued = timeDiff * contractState.emissionPerSecond;
+            const rewardPerTokenIncrease = rewardAccrued / contractState.totalEffectiveStake;
+            console.log("timeDiff", timeDiff);
+            console.log("contractState.emissionPerSecond", contractState.emissionPerSecond);
+            console.log("rewardAccrued", rewardAccrued);
+            console.log("rewardPerTokenIncrease", rewardPerTokenIncrease);
+            console.log("contractState.rewardPerTokenStored", contractState.rewardPerTokenStored);
+            console.log("contractState.rewardPerTokenStored + rewardPerTokenIncrease", contractState.rewardPerTokenStored + rewardPerTokenIncrease);
+            return contractState.rewardPerTokenStored + rewardPerTokenIncrease;
+        }
+
+        function calculateEarned(stakeId) {
+            const stake = userStakes.get(stakeId);
+            if (!stake || !stake.active) return BigInt('0');
+
+            const currentRewardPerToken = calculateRewardPerToken();
+            const rewardPerTokenDiff = currentRewardPerToken - stake.userRewardPerTokenPaid;
+            const earned = (stake.effectiveAmount * rewardPerTokenDiff) / PRECISION_FACTOR;
+            
+            return earned + stake.pendingRewards;
+        }
+
+        function updateStake(stakeId) {
+            const stake = userStakes.get(stakeId);
+            if (!stake || !stake.active) return;
+
+            stake.pendingRewards = calculateEarned(stakeId);
+            stake.userRewardPerTokenPaid = contractState.rewardPerTokenStored;
+        }
+
+        // Actions
+        function executeStake() {
+            try {
+                const amountStr = document.getElementById('stakeAmount').value;
+                const lockId = parseInt(document.getElementById('lockOption').value);
+                
+                if (!amountStr || amountStr === '0') {
+                    throw new Error('Invalid stake amount');
+                }
+
+                const amount = parseTokenAmount(amountStr);
+                
+                updateReward();
+                
+                const stakeId = contractState.nextStakeId++;
+                const newStake = new StakeInfo(stakeId, amount, lockId);
+                
+                userStakes.set(stakeId, newStake);
+                contractState.totalEffectiveStake += newStake.effectiveAmount;
+
+                // Record transaction
+                transactionHistory.push({
+                    timestamp: contractState.currentTime,
+                    action: 'STAKE',
+                    stakeId: stakeId,
+                    amount: amount,
+                    details: `${lockOptions[lockId].name} - ${(newStake.multiplier * BigInt('100') / PRECISION_FACTOR)}% multiplier`
+                });
+
+                showSuccessMessage('stakeMessage', `Staked successfully! Stake ID: ${stakeId}`);
+                updateDisplay();
+            } catch (error) {
+                showErrorMessage('stakeMessage', error.message);
+            }
+        }
+
+        function executeUnstake() {
+            try {
+                const stakeId = parseInt(document.getElementById('unstakeId').value);
+                const stake = userStakes.get(stakeId);
+                
+                if (!stake || !stake.active) {
+                    throw new Error('Invalid stake ID');
+                }
+
+                if (stake.stakeType === 'LOCKED' && contractState.currentTime < stake.unlockTime) {
+                    throw new Error('Stake still locked');
+                }
+
+                updateReward();
+                updateStake(stakeId);
+
+                // For flexible stakes, claim rewards
+                if (stake.stakeType === 'FLEXIBLE' && stake.pendingRewards > BigInt('0')) {
+                    contractState.totalRewardsClaimed += stake.pendingRewards;
+                    stake.pendingRewards = BigInt('0');
+                }
+
+                contractState.totalEffectiveStake -= stake.effectiveAmount;
+                stake.active = false;
+
+                // Record transaction
+                transactionHistory.push({
+                    timestamp: contractState.currentTime,
+                    action: 'UNSTAKE',
+                    stakeId: stakeId,
+                    amount: stake.amount,
+                    details: `${stake.stakeType} stake unstaked`
+                });
+
+                showSuccessMessage('unstakeMessage', `Unstaked successfully! Amount: ${formatUint256Display(stake.amount)}`);
+                updateDisplay();
+            } catch (error) {
+                showErrorMessage('unstakeMessage', error.message);
+            }
+        }
+
+        function executeClaim() {
+            try {
+                const stakeIdInput = document.getElementById('claimId').value;
+                
+                updateReward();
+                
+                if (stakeIdInput === '') {
+                    // Claim all
+                    let totalRewards = BigInt('0');
+                    for (const [stakeId, stake] of userStakes) {
+                        if (stake.active) {
+                            updateStake(stakeId);
+                            totalRewards += stake.pendingRewards;
+                            stake.pendingRewards = BigInt('0');
+                        }
+                    }
+                    
+                    if (totalRewards === BigInt('0')) {
+                        throw new Error('No pending rewards');
+                    }
+                    
+                    contractState.totalRewardsClaimed += totalRewards;
+                    
+                    transactionHistory.push({
+                        timestamp: contractState.currentTime,
+                        action: 'CLAIM_ALL',
+                        stakeId: 'ALL',
+                        amount: totalRewards,
+                        details: 'Claimed all rewards'
+                    });
+                    
+                    showSuccessMessage('claimMessage', `Claimed all rewards: ${formatUint256Display(totalRewards)}`);
+                } else {
+                    // Claim specific stake
+                    const stakeId = parseInt(stakeIdInput);
+                    const stake = userStakes.get(stakeId);
+                    
+                    if (!stake || !stake.active) {
+                        throw new Error('Invalid stake ID');
+                    }
+                    
+                    updateStake(stakeId);
+                    
+                    if (stake.pendingRewards === BigInt('0')) {
+                        throw new Error('No pending rewards');
+                    }
+                    
+                    const rewardAmount = stake.pendingRewards;
+                    stake.pendingRewards = BigInt('0');
+                    contractState.totalRewardsClaimed += rewardAmount;
+                    
+                    transactionHistory.push({
+                        timestamp: contractState.currentTime,
+                        action: 'CLAIM',
+                        stakeId: stakeId,
+                        amount: rewardAmount,
+                        details: `Claimed rewards for stake ${stakeId}`
+                    });
+                    
+                    showSuccessMessage('claimMessage', `Claimed rewards: ${formatUint256Display(rewardAmount)}`);
+                }
+                
+                updateDisplay();
+            } catch (error) {
+                showErrorMessage('claimMessage', error.message);
+            }
+        }
+
+        function executeEmergencyUnstake() {
+            try {
+                const stakeId = parseInt(document.getElementById('emergencyId').value);
+                const stake = userStakes.get(stakeId);
+                
+                if (!stake || !stake.active) {
+                    throw new Error('Invalid stake ID');
+                }
+
+                updateReward();
+                updateStake(stakeId);
+
+                const forfeitedRewards = stake.pendingRewards;
+                contractState.totalEffectiveStake -= stake.effectiveAmount;
+                stake.active = false;
+
+                // Record transaction
+                transactionHistory.push({
+                    timestamp: contractState.currentTime,
+                    action: 'EMERGENCY_UNSTAKE',
+                    stakeId: stakeId,
+                    amount: stake.amount,
+                    details: `Emergency unstake - Forfeited rewards: ${forfeitedRewards}`
+                });
+
+                showSuccessMessage('emergencyMessage', `Emergency unstaked! Forfeited rewards: ${formatUint256Display(forfeitedRewards)}`);
+                updateDisplay();
+            } catch (error) {
+                showErrorMessage('emergencyMessage', error.message);
+            }
+        }
+
+        function skipTime() {
+            const seconds = parseInt(document.getElementById('skipTime').value) || 0;
+            contractState.currentTime += BigInt(seconds);
+            updateReward();
+            for (const [stakeId, stake] of userStakes) {
+                if (stake.active) {
+                    updateStake(stakeId);
+                }
+            }
+            updateDisplay();
+        }
+
+        // UI Functions
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-content').style.display = 'block';
+            
+            // Add active class to selected tab
+            event.target.classList.add('active');
+        }
+
+        function showErrorMessage(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        function showSuccessMessage(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="success-message">${message}</div>`;
+        }
+
+        function formatUint256(value) {
+            return value.toString();
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(Number(timestamp) * 1000);
+            return `${timestamp} (${date.toLocaleString()})`;
+        }
+
+        function updateDisplay() {
+            // Update contract state display
+            document.getElementById('currentTime').textContent = formatTimestamp(contractState.currentTime);
+            document.getElementById('annualRewardPool').textContent = formatUint256Display(contractState.annualRewardPool / PRECISION_FACTOR);
+            document.getElementById('emissionPerSecond').textContent = formatUint256Display(contractState.emissionPerSecond / PRECISION_FACTOR);
+            document.getElementById('totalEffectiveStake').textContent = formatUint256Display(contractState.totalEffectiveStake);
+            document.getElementById('rewardPerToken').textContent = formatUint256Display(calculateRewardPerToken());
+            document.getElementById('totalRewardsClaimed').textContent = formatUint256Display(contractState.totalRewardsClaimed);
+            document.getElementById('lastUpdateTime').textContent = formatTimestamp(contractState.lastUpdateTime);
+            // Update stakes table
+            const stakesTableBody = document.getElementById('stakesTableBody');
+            stakesTableBody.innerHTML = '';
+            
+            for (const [stakeId, stake] of userStakes) {
+                if (stake.active) {
+                    const pendingRewards = calculateEarned(stakeId);
+                    const row = stakesTableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${stakeId}</td>
+                        <td>${stake.stakeType}</td>
+                        <td><span class="uint256">${formatUint256Display(stake.amount)}</span></td>
+                        <td><span class="uint256">${formatUint256Display(stake.effectiveAmount)}</span></td>
+                        <td>${(stake.multiplier * BigInt('100') / PRECISION_FACTOR)}%</td>
+                        <td><span class="timestamp">${formatTimestamp(stake.startTime)}</span></td>
+                        <td><span class="timestamp">${stake.unlockTime > BigInt('0') ? formatTimestamp(stake.unlockTime) : 'N/A'}</span></td>
+                        <td><span class="uint256">${contractState.currentTime - stake.startTime}</span></td>
+                        <td><span class="uint256">${formatUint256Display(pendingRewards)}</span></td>
+                        <td><span class="uint256">${formatUint256Display(stake.userRewardPerTokenPaid)}</span></td>
+                        <td><span class="status-active">Active</span></td>
+                    `;
+                }
+            }
+
+            // Update transactions table
+            const transactionsTableBody = document.getElementById('transactionsTableBody');
+            transactionsTableBody.innerHTML = '';
+            
+            // Show last 20 transactions (most recent first)
+            const recentTransactions = transactionHistory.slice(-20).reverse();
+            for (const tx of recentTransactions) {
+                const row = transactionsTableBody.insertRow();
+                row.innerHTML = `
+                    <td><span class="timestamp">${formatTimestamp(tx.timestamp)}</span></td>
+                    <td>${tx.action}</td>
+                    <td>${tx.stakeId}</td>
+                    <td><span class="uint256">${formatUint256Display(tx.amount)}</span></td>
+                    <td>${tx.details}</td>
+                `;
+            }
+
+            // Update analytics
+            let totalStaked = BigInt('0');
+            let totalPendingRewards = BigInt('0');
+            
+            for (const [stakeId, stake] of userStakes) {
+                if (stake.active) {
+                    totalStaked += stake.amount;
+                    totalPendingRewards += calculateEarned(stakeId);
+                }
+            }
+
+            document.getElementById('totalStaked').textContent = formatUint256Display(totalStaked);
+            document.getElementById('totalRewardsClaimed').textContent = formatUint256Display(contractState.totalRewardsClaimed);
+            document.getElementById('totalPendingRewards').textContent = formatUint256Display(totalPendingRewards);
+            
+            // Calculate current APR
+            let currentAPR = '0';
+            if (contractState.totalEffectiveStake > BigInt('0')) {
+                const aprBigInt = (contractState.emissionPerSecond * SECONDS_PER_YEAR * BigInt('100')) / contractState.totalEffectiveStake;
+                currentAPR = (Number(aprBigInt) / Number(PRECISION_FACTOR)).toFixed(2);
+            }
+            document.getElementById('currentAPR').textContent = currentAPR + '%';
+
+            // Clear messages after update
+            setTimeout(() => {
+                document.getElementById('stakeMessage').innerHTML = '';
+                document.getElementById('unstakeMessage').innerHTML = '';
+                document.getElementById('claimMessage').innerHTML = '';
+                document.getElementById('emergencyMessage').innerHTML = '';
+            }, 3000);
+        }
+
+        // Format large numbers with separators for better readability
+        function formatUint256Display(value) {
+            // value is BigInt in wei
+            const tokens = Number(value) / 1e18;
+            if (tokens >= 1) {
+                return tokens.toLocaleString(undefined, { maximumFractionDigits: 6 }) + ' tokens';
+            } else {
+                // Show up to 6 decimals for small values
+                return tokens.toFixed(6) + ' tokens';
+            }
+        }
+
+        // Helper function to convert display format to uint256
+        function parseTokenAmount(displayValue) {
+            // Remove commas and spaces
+            const cleaned = displayValue.replace(/[\s,]/g, '');
+            
+            // If it contains decimal point, handle accordingly
+            if (cleaned.includes('.')) {
+                const [integerPart, decimalPart] = cleaned.split('.');
+                const paddedDecimal = (decimalPart || '').padEnd(18, '0').slice(0, 18);
+                return BigInt((integerPart || '0') + paddedDecimal);
+            } else {
+                // Assume it's integer tokens, convert to wei
+                return BigInt(cleaned) * PRECISION_FACTOR;
+            }
+        }
+
+        // Add some preset amounts for easier testing
+        function setPresetAmount(amount) {
+            // amount is in wei, convert to human-readable
+            const tokens = (BigInt(amount) / PRECISION_FACTOR).toLocaleString();
+            document.getElementById('stakeAmount').value = tokens;
+        }
+
+        // Initialize display
+        updateDisplay();
+
+        // Add preset buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const stakeSection = document.querySelector('.action-section');
+            const presetButtons = document.createElement('div');
+            presetButtons.style.marginTop = '10px';
+            presetButtons.innerHTML = `
+                <small>Quick amounts:</small><br>
+                <button type="button" onclick="setPresetAmount('1000000000000000000000')" style="margin: 2px; padding: 5px 10px; font-size: 0.8rem;">1000 tokens</button>
+                <button type="button" onclick="setPresetAmount('10000000000000000000000')" style="margin: 2px; padding: 5px 10px; font-size: 0.8rem;">10K tokens</button>
+                <button type="button" onclick="setPresetAmount('100000000000000000000000')" style="margin: 2px; padding: 5px 10px; font-size: 0.8rem;">100K tokens</button>
+            `;
+            stakeSection.appendChild(presetButtons);
+        });
+
+        // --- Auto/manual update logic ---
+        let autoUpdateInterval = null;
+        function startAutoUpdate() {
+            if (autoUpdateInterval) return;
+            autoUpdateInterval = setInterval(() => {
+                contractState.currentTime += BigInt(1);
+                updateDisplay();
+                // updateReward();
+                // for (const [stakeId, stake] of userStakes) {
+                //     if (stake.active) {
+                //         updateStake(stakeId);
+                //     }
+                // }
+                // updateDisplay();
+            }, 1000);
+        }
+        function stopAutoUpdate() {
+            if (autoUpdateInterval) {
+                clearInterval(autoUpdateInterval);
+                autoUpdateInterval = null;
+            }
+        }
+
+        // Listen for toggle changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('autoUpdateToggle');
+            toggle.addEventListener('change', function() {
+                if (toggle.checked) {
+                    startAutoUpdate();
+                } else {
+                    stopAutoUpdate();
+                }
+            });
+            // Start auto-update by default
+            startAutoUpdate();
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        showTab('stakes');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        showTab('transactions');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        showTab('analytics');
+                        break;
+                }
+            }
+        });
+
+        // Export functionality
+        function exportData() {
+            const exportData = {
+                contractState: {
+                    currentTime: contractState.currentTime.toString(),
+                    annualRewardPool: contractState.annualRewardPool.toString(),
+                    emissionPerSecond: contractState.emissionPerSecond.toString(),
+                    totalEffectiveStake: contractState.totalEffectiveStake.toString(),
+                    rewardPerTokenStored: contractState.rewardPerTokenStored.toString(),
+                    lastUpdateTime: contractState.lastUpdateTime.toString(),
+                    totalRewardsClaimed: contractState.totalRewardsClaimed.toString(),
+                    nextStakeId: contractState.nextStakeId
+                },
+                stakes: Array.from(userStakes.entries()).map(([id, stake]) => ({
+                    id,
+                    ...Object.fromEntries(
+                        Object.entries(stake).map(([key, value]) => [
+                            key, 
+                            typeof value === 'bigint' ? value.toString() : value
+                        ])
+                    )
+                })),
+                transactions: transactionHistory.map(tx => ({
+                    ...tx,
+                    timestamp: tx.timestamp.toString(),
+                    amount: tx.amount.toString()
+                }))
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `staking-simulation-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Add export button to analytics tab
+        document.getElementById('analytics-content').innerHTML += `
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn btn-primary" onclick="exportData()" style="width: auto; padding: 12px 30px;">
+                    📊 Export Simulation Data
+                </button>
+            </div>
+        `;
+
+        // Add scenario presets
+        function loadScenario(scenarioName) {
+            // Reset state
+            userStakes.clear();
+            transactionHistory = [];
+            contractState.totalEffectiveStake = BigInt('0');
+            contractState.totalRewardsClaimed = BigInt('0');
+            contractState.nextStakeId = 1;
+            contractState.currentTime = BigInt('1640995200');
+            contractState.lastUpdateTime = BigInt('1640995200');
+            contractState.rewardPerTokenStored = BigInt('0');
+
+            switch(scenarioName) {
+                case 'mixed':
+                    // Create mixed scenario
+                    executeStakeInternal('10000', 0); // 10K flexible
+                    skipTimeInternal(86400); // 1 day
+                    executeStakeInternal('5000', 1); // 5K 90-day lock
+                    skipTimeInternal(86400 * 30); // 30 days
+                    executeStakeInternal('20000', 2); // 20K 180-day lock
+                    break;
+                case 'longterm':
+                    // Long term staking scenario
+                    executeStakeInternal('50000', 3); // 50K 365-day lock
+                    skipTimeInternal(86400 * 180); // 180 days
+                    executeStakeInternal('25000', 3); // 25K 365-day lock
+                    break;
+                case 'flexible':
+                    // Flexible staking with regular claims
+                    executeStakeInternal('15000', 0); // 15K flexible
+                    skipTimeInternal(86400 * 7); // 7 days
+                    claimAllInternal();
+                    skipTimeInternal(86400 * 7); // 7 days
+                    executeStakeInternal('10000', 0); // 10K flexible
+                    break;
+            }
+            updateDisplay();
+        }
+
+        // Internal functions for scenarios (without UI updates)
+        function executeStakeInternal(amountStr, lockId) {
+            const amount = parseTokenAmount(amountStr);
+            updateReward();
+            const stakeId = contractState.nextStakeId++;
+            const newStake = new StakeInfo(stakeId, amount, lockId);
+            userStakes.set(stakeId, newStake);
+            contractState.totalEffectiveStake += newStake.effectiveAmount;
+            transactionHistory.push({
+                timestamp: contractState.currentTime,
+                action: 'STAKE',
+                stakeId: stakeId,
+                amount: amount,
+                details: `${lockOptions[lockId].name} - ${(newStake.multiplier * BigInt('100') / PRECISION_FACTOR)}% multiplier`
+            });
+        }
+
+        function skipTimeInternal(seconds) {
+            contractState.currentTime += BigInt(seconds);
+        }
+
+        function claimAllInternal() {
+            updateReward();
+            let totalRewards = BigInt('0');
+            for (const [stakeId, stake] of userStakes) {
+                if (stake.active) {
+                    updateStake(stakeId);
+                    totalRewards += stake.pendingRewards;
+                    stake.pendingRewards = BigInt('0');
+                }
+            }
+            if (totalRewards > BigInt('0')) {
+                contractState.totalRewardsClaimed += totalRewards;
+                transactionHistory.push({
+                    timestamp: contractState.currentTime,
+                    action: 'CLAIM_ALL',
+                    stakeId: 'ALL',
+                    amount: totalRewards,
+                    details: 'Claimed all rewards'
+                });
+            }
+        }
+
+        // Add scenario buttons to controls panel
+        const scenarioSection = document.createElement('div');
+        scenarioSection.className = 'action-section';
+        scenarioSection.innerHTML = `
+            <h4><span class="action-icon" style="background: #9b59b6;">🎭</span>Scenario Presets</h4>
+            <button class="btn btn-primary" onclick="loadScenario('mixed')" style="margin-bottom: 10px;">Mixed Strategy</button>
+            <button class="btn btn-primary" onclick="loadScenario('longterm')" style="margin-bottom: 10px;">Long Term</button>
+            <button class="btn btn-primary" onclick="loadScenario('flexible')" style="margin-bottom: 10px;">Flexible Only</button>
+        `;
+        document.querySelector('.controls-panel').appendChild(scenarioSection);
+
+        // 2. Add auto-formatting for the stake amount input
+        const stakeAmountInput = document.getElementById('stakeAmount');
+
+        function formatInputAmount(value) {
+            // Remove all non-numeric except dot
+            let cleaned = value.replace(/[^\d.]/g, '');
+            // Only keep the first decimal point
+            const parts = cleaned.split('.');
+            let integer = parts[0] || '0';
+            let decimal = parts[1] !== undefined ? parts[1].replace(/\./g, '') : undefined;
+            // Add thousand separators to integer part
+            integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            if (decimal !== undefined) {
+                return `${integer}.${decimal}`;
+            } else {
+                return integer;
+            }
+        }
+
+        stakeAmountInput.addEventListener('input', function(e) {
+            const cursorPos = stakeAmountInput.selectionStart;
+            const oldValue = stakeAmountInput.value;
+            const formatted = formatInputAmount(oldValue);
+            stakeAmountInput.value = formatted;
+            // Try to keep cursor position (not perfect for all cases)
+            stakeAmountInput.setSelectionRange(cursorPos, cursorPos);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "name": "mwx-smart-contract",
+  "version": "1.0.0",
+  "description": "MWX Smart Contract",
+  "main": "index.js",
+  "scripts": {
+    "test": "hardhat test",
+    "lint": "npm run prettier -- --check && npm run eslint",
+    "lint:fix": "npm run prettier -- --write && npm run eslint -- --fix",
+    "eslint": "eslint \"ignition/**/*.{js,jsx,ts,tsx}\" \"test/**/*.{js,jsx,ts,tsx}\"",
+    "prettier": "prettier \"*.{js,ts,md,json}\" \"ignition/modules/*.{js,ts,md,json}\" \"test/*.{js,ts,md,json}\" \"contracts/**/*.sol\""
+  },
+  "keywords": [
+    "mwx",
+    "smart",
+    "contract"
+  ],
+  "author": "Toriq Ahmad",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.9",
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.12",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/hardhat-upgrades": "^3.9.0",
+    "ethers": "^6.14.3",
+    "hardhat": "^2.24.2",
+    "prettier-plugin-solidity": "^2.0.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.3.0",
+    "@openzeppelin/contracts-upgradeable": "^5.3.0",
+    "dotenv": "^16.5.0"
+  }
+}
