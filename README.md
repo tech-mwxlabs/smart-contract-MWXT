@@ -122,12 +122,12 @@ const userInfo = await mwxLaunchpad.getUserInfo(userAddress);
 #### Post-Deployment Configuration
 After deployment, update your backend environment:
 ```bash
-SIGNER_PRIVATE_KEY= (private key of Admin verifier address)
+SIGNER_PRIVATE_KEY=<your_admin_verifier_private_key>
 LAUNCHPAD_VERSION=1
-LAUNCHPAD_CONTRACT_ADDRESS= (contract address of launchpad)
-LAUNCHPAD_CHAIN_ID= (chain id of contract address deployed)
-LAUNCHPAD_USDC_TOKEN_ADDRESS= (token address of usdc setted in launchpad)
-LAUNCHPAD_USDT_TOKEN_ADDRESS= (token address of usdt setted in launchpad)
+LAUNCHPAD_CONTRACT_ADDRESS=<deployed_launchpad_address>
+LAUNCHPAD_CHAIN_ID=<network_chain_id>
+LAUNCHPAD_USDC_TOKEN_ADDRESS=<usdc_token_address>
+LAUNCHPAD_USDT_TOKEN_ADDRESS=<usdt_token_address>
 ```
 
 **Important Notes:**
